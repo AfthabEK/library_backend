@@ -31,11 +31,30 @@ app.get('/ebooks/:id' , async(req,res)=> {
 app.get("/ebooks", async (req, res) => {
   pool.getConnection(function (err, connection) {
     connection.query(
-      `SELECT * FROM ebooks_publisher`,
+      `SELECT * FROM ebooks_publisher where link=""; SELECT * FROM ebooks_publisher where link <> ""`,
       async (err, data) => {
         connection.release();
         if (err) console.log(err);
-        else res.json({ data });
+        else res.json({ data:data[0], links:data[1] });
+      }
+    );
+  });
+});
+
+app.get("/ojournals", async (req, res) => {
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `SELECT * FROM online_journals_publisher where type = "eshodh" and link=""; SELECT * FROM online_journals_publisher where type = "subscribed" and link=""; SELECT * FROM online_journals_publisher where type = "eshodh" and link <> ""; SELECT * FROM online_journals_publisher where type = "subscribed" and link <> ""; `,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else
+          res.json({
+            eshodh: data[0],
+            sub: data[1],
+            elinks: data[2],
+            slinks: data[3],
+          });
       }
     );
   });
