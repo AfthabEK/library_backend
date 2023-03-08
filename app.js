@@ -60,6 +60,20 @@ app.get("/ojournals", async (req, res) => {
   });
 });
 
+app.get("/ojournals/:id", async (req, res) => {
+  const { id } = req.params;
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `SELECT * FROM online_journals where publisher_id=${id};`,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else res.json({ data });
+      }
+    );
+  });
+});
+
 app.listen(7000, () => {
   console.log("LISTENING ON PORT 7000!");
 });
