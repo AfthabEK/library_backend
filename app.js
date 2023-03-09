@@ -41,6 +41,19 @@ app.get("/ebooks", async (req, res) => {
   });
 });
 
+app.get("/pjournals", async (req, res) => {
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `SELECT * FROM p_journals;`,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else res.json({ data });
+      }
+    );
+  });
+});
+
 app.get("/ojournals", async (req, res) => {
   pool.getConnection(function (err, connection) {
     connection.query(
