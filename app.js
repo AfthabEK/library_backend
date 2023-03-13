@@ -54,6 +54,16 @@ app.get("/pjournals", async (req, res) => {
   });
 });
 
+app.get("/dailies", async (req, res) => {
+  pool.getConnection(function (err, connection) {
+    connection.query(`SELECT * FROM dailies_and_mags;`, async (err, data) => {
+      connection.release();
+      if (err) console.log(err);
+      else res.json({ data });
+    });
+  });
+});
+
 app.get("/ojournals", async (req, res) => {
   pool.getConnection(function (err, connection) {
     connection.query(

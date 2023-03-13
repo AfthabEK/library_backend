@@ -16,7 +16,7 @@ app.get("/seed", async (req, res) => {
   pool.getConnection(function (err, connection) {
     for (let result of results) {
       connection.query(
-        `INSERT INTO p_journals(title,img) VALUES("${result.title}", "${result.img}");`,
+        `INSERT INTO dailies_and_mags(title,img) VALUES("${result.title}", "${result.img}");`,
         async (err, articles) => {
           if (err) console.log(err);
         }
