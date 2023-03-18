@@ -6,13 +6,26 @@ const cors = require("cors");
 app.use(cors());
 
 var pool = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "library",
+  host: "sql12.freesqldatabase.com",
+  user: "sql12605714",
+  password: "kN7HeDXJf7",
+  database: "sql12605714",
   multipleStatements: "true", //this is required for querying multiple statements in mysql
+  port: 3306,
 });
 
+app.get("/", async(req,res) => {
+      pool.getConnection(function (err, connection) {
+        connection.query(
+          `SELECT * FROM announcements;`,
+          async (err, data) => {
+            connection.release();
+            if (err) console.log(err);
+            else res.json({ data });
+          }
+        );
+      });
+})
 app.get('/ebooks/:id' , async(req,res)=> {
   const { id } = req.params;
     pool.getConnection(function(err , connection) {
