@@ -1,17 +1,21 @@
 const express = require("express");
+const bodyParser = require('body-parser');
 const app = express();
 const path = require("path");
 const mysql = require("mysql");
 const cors = require("cors");
 app.use(cors());
 
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 var pool = mysql.createPool({
-  host: "sql12.freesqldatabase.com",
-  user: "sql12605714",
-  password: "kN7HeDXJf7",
-  database: "sql12605714",
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "library2",
   multipleStatements: "true", //this is required for querying multiple statements in mysql
-  port: 3306,
+  port:8111,
 });
 
 app.get("/", async(req,res) => {
@@ -110,6 +114,48 @@ app.get("/ojournals/:id", async (req, res) => {
   });
 });
 
+app.get("/publishers",async (req,res)=>{
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `SELECT name FROM ebooks_publisher `,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else {
+          res.json({ data });
+          console.log(data);
+        }
+      }
+    );
+  });
+})
+
+app.post("/new-ebook",async(req,res)=>{
+  console.log(req.body);
+  const {title,link,publisher,author}=req.body;
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `SELECT publisher_id FROM ebooks_publisher WHERE name='${publisher}' `,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else {
+          console.log(data);
+          pool.getConnection(function (err2, connection2) {
+            connection2.query(
+              `INSERT INTO ebooks(publisher,author,title,link,year,publisher_id) VALUES('${publisher}','${author}','${title}','${link}',2023,${data[0].publisher_id}) `,
+              async (err2, data2) => {
+                connection2.release();
+                if (err2) console.log(err2);
+              }
+            );
+          })
+        }
+      }
+    );
+  })
+  
+})
 app.listen(7000, () => {
   console.log("LISTENING ON PORT 7000!");
 });
