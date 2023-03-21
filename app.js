@@ -123,7 +123,6 @@ app.get("/publishers",async (req,res)=>{
         if (err) console.log(err);
         else {
           res.json({ data });
-          console.log(data);
         }
       }
     );
@@ -154,8 +153,12 @@ app.post("/new-ebook",async(req,res)=>{
       }
     );
   })
-  
 })
+
+app.post("/multiple-new-ebook",async(req,res)=>{
+  console.log(req.body);
+})
+
 app.listen(7000, () => {
   console.log("LISTENING ON PORT 7000!");
 });
