@@ -160,6 +160,30 @@ app.post("/multiple-new-ebook",async(req,res)=>{
   const {ebooks,publishers}=req.body;
   const allPublishersPresent =await ebooks.every(({Publisher}) => publishers.some(({name}) => name === Publisher));
   if(allPublishersPresent===true){
+    ebooks.forEach((ebook)=>{
+      const {Title,Link,Publisher,Author}=ebook;
+      pool.getConnection(function (err, connection) {
+        connection.query(
+          `SELECT publisher_id FROM ebooks_publisher WHERE name='${Publisher}' `,
+          async (err, data) => {
+            connection.release();
+            if (err) console.log(err);
+            else {
+              console.log(data);
+              pool.getConnection(function (err2, connection2) {
+                connection2.query(
+                  `INSERT INTO ebooks(publisher,author,title,link,year,publisher_id) VALUES('${Publisher}','${Author}','${Title}','${Link}',2023,${data[0].publisher_id}) `,
+                  async (err2, data2) => {
+                    connection2.release();
+                    if (err2) console.log(err2);
+                  }
+                );
+              })
+            }
+          }
+        );
+      })
+    })
     const responseData = { message: 'The request was successful.',color:'success' };
   
     // Send the response data back to the client
