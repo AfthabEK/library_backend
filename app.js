@@ -157,6 +157,21 @@ app.post("/new-ebook",async(req,res)=>{
 
 app.post("/multiple-new-ebook",async(req,res)=>{
   console.log(req.body);
+  const {ebooks,publishers}=req.body;
+  const allPublishersPresent =await ebooks.every(({Publisher}) => publishers.some(({name}) => name === Publisher));
+  if(allPublishersPresent===true){
+    const responseData = { message: 'The request was successful.',color:'success' };
+  
+    // Send the response data back to the client
+    res.send(responseData);
+  }
+  else{
+    const responseData = { message: 'Some of the publishers where not present in the database',color:'danger' };
+  
+  // Send the response data back to the client
+    res.send(responseData);
+  }
+
 })
 
 app.listen(7000, () => {
