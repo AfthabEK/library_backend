@@ -30,6 +30,7 @@ app.get("/", async(req,res) => {
         );
       });
 })
+
 app.get('/ebooks/:id' , async(req,res)=> {
   const { id } = req.params;
     pool.getConnection(function(err , connection) {
@@ -43,6 +44,67 @@ app.get('/ebooks/:id' , async(req,res)=> {
             }
         )
     })
+})
+
+app.get('/ebooks/:publisher_id/:ebook_id',async(req,res)=>{
+  const {publisher_id,ebook_id}=req.params;
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `SELECT * FROM ebooks where book_id='${ebook_id}';`,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else res.json({ data:data[0], links:data[1] });
+      }
+    );
+  });
+})
+
+app.put('/ebooks/:publisher_id/:ebook_id',async(req,res)=>{
+  const {title,link,publisherData,author}=req.body;
+  const {ebook_id}=req.params
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `SELECT publisher_id FROM ebooks_publisher WHERE name='${publisherData}' `,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else {
+          console.log(data);
+          pool.getConnection(function (err2, connection2) {
+            connection2.query(
+              `UPDATE ebooks
+              SET publisher = '${publisherData}',
+                  author = '${author}',
+                  title = '${title}',
+                  link = '${link}',
+                  year = 2023,
+                  publisher_id = ${data[0].publisher_id}
+              WHERE book_id = ${ebook_id};`,
+              async (err2, data2) => {
+                connection2.release();
+                if (err2) console.log(err2);
+              }
+            );
+          })
+        }
+      }
+    );
+  })
+})
+
+app.delete('/ebooks/:publisher_id/:ebook_id',async(req,res)=>{
+  const {publisher_id,ebook_id}=req.params;
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `DELETE FROM ebooks where book_id='${ebook_id}';`,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else res.json({ data:data[0], links:data[1] });
+      }
+    );
+  });
 })
 
 app.get("/ebooks", async (req, res) => {
