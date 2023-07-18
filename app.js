@@ -18,6 +18,8 @@ var pool = mysql.createPool({
   port:8111,
 });
 
+
+//Home Page
 app.get("/", async(req,res) => {
       pool.getConnection(function (err, connection) {
         connection.query(
@@ -31,6 +33,21 @@ app.get("/", async(req,res) => {
       });
 })
 
+//All Ebook Publisher Show Page
+app.get("/ebooks", async (req, res) => {
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `SELECT * FROM ebooks_publisher where link=""; SELECT * FROM ebooks_publisher where link <> ""`,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else res.json({ data:data[0], links:data[1] });
+      }
+    );
+  });
+});
+
+//All Ebooks Of One particular Publisher
 app.get('/ebooks/:id' , async(req,res)=> {
   const { id } = req.params;
     pool.getConnection(function(err , connection) {
@@ -46,6 +63,8 @@ app.get('/ebooks/:id' , async(req,res)=> {
     })
 })
 
+
+//Edit Individual Ebook Form Page
 app.get('/ebooks/:publisher_id/:ebook_id',async(req,res)=>{
   const {publisher_id,ebook_id}=req.params;
   pool.getConnection(function (err, connection) {
@@ -60,6 +79,7 @@ app.get('/ebooks/:publisher_id/:ebook_id',async(req,res)=>{
   });
 })
 
+//Edit Individual Ebook Request
 app.put('/ebooks/:publisher_id/:ebook_id',async(req,res)=>{
   const {title,link,publisherData,author}=req.body;
   const {ebook_id}=req.params
@@ -93,6 +113,7 @@ app.put('/ebooks/:publisher_id/:ebook_id',async(req,res)=>{
   })
 })
 
+//Delete Individual Ebook
 app.delete('/ebooks/:publisher_id/:ebook_id',async(req,res)=>{
   const {publisher_id,ebook_id}=req.params;
   pool.getConnection(function (err, connection) {
@@ -107,19 +128,8 @@ app.delete('/ebooks/:publisher_id/:ebook_id',async(req,res)=>{
   });
 })
 
-app.get("/ebooks", async (req, res) => {
-  pool.getConnection(function (err, connection) {
-    connection.query(
-      `SELECT * FROM ebooks_publisher where link=""; SELECT * FROM ebooks_publisher where link <> ""`,
-      async (err, data) => {
-        connection.release();
-        if (err) console.log(err);
-        else res.json({ data:data[0], links:data[1] });
-      }
-    );
-  });
-});
 
+//Get All Pjournals
 app.get("/pjournals", async (req, res) => {
   pool.getConnection(function (err, connection) {
     connection.query(
@@ -133,6 +143,8 @@ app.get("/pjournals", async (req, res) => {
   });
 });
 
+
+//Get All Dailies
 app.get("/dailies", async (req, res) => {
   pool.getConnection(function (err, connection) {
     connection.query(`SELECT * FROM dailies_and_mags;`, async (err, data) => {
@@ -143,6 +155,8 @@ app.get("/dailies", async (req, res) => {
   });
 });
 
+
+//Get All Ojournals Publishers
 app.get("/ojournals", async (req, res) => {
   pool.getConnection(function (err, connection) {
     connection.query(
@@ -162,6 +176,114 @@ app.get("/ojournals", async (req, res) => {
   });
 });
 
+//Get All Ojounal Publisher
+app.get("/online-publishers",async (req,res)=>{
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `SELECT name FROM online_journals_publisher `,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else {
+          res.json({ data });
+        }
+      }
+    );
+  });
+})
+
+//POST NEW Ojournal
+app.post("/new-ojournal",async(req,res)=>{
+  console.log(req.body);
+  const {title,link,publisherData}=req.body;
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `SELECT * FROM online_journals_publisher WHERE online_journals_publisher.name='${publisherData}'`,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else {
+          console.log(data);
+          pool.getConnection(function (err2, connection2) {
+            connection2.query(
+              `INSERT INTO online_journals(publisher,title,link,year,publisher_id) VALUES('${publisherData}','${title}','${link}','OTHER',${data[0].publisher_id}) `,
+              async (err2, data2) => {
+                connection2.release();
+                if (err2) console.log(err2);
+              }
+            );
+          })
+        }
+      }
+    );
+  })
+})
+
+//Edit Individual Ojournal Form Page
+app.get('/ojournals/:publisher_id/:ebook_id', async(req,res)=>{
+  const {publisher_id,ebook_id}=req.params;
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `SELECT * FROM ebooks where book_id='${ebook_id}';`,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else res.json({ data:data[0], links:data[1] });
+      }
+    );
+  });
+})
+
+//Edit Individual Online Journal Request
+app.put('/ojournals/:publisher_id/:journal_id',async(req,res)=>{
+  const {title,link,publisherData}=req.body;
+  const {journal_id}=req.params
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `SELECT publisher_id FROM online_journals_publisher WHERE online_journals_publisher.name='${publisherData}' `,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else {
+          console.log(data);
+          pool.getConnection(function (err2, connection2) {
+            connection2.query(
+              `UPDATE online_journals
+              SET publisher = '${publisherData}',
+                  title = '${title}',
+                  link = '${link}',
+                  year = 'OTHER',
+                  publisher_id = ${data[0].publisher_id}
+              WHERE journal_id = ${journal_id};`,
+              async (err2, data2) => {
+                connection2.release();
+                if (err2) console.log(err2);
+              }
+            );
+          })
+        }
+      }
+    );
+  })
+})
+
+//Delete Individual Online Ojournal
+app.delete('/ojournals/:publisher_id/:journal_id',async(req,res)=>{
+  const {publisher_id,journal_id}=req.params;
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `DELETE FROM ebooks where journal_id='${journal_id}';`,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else res.json({ data:data[0], links:data[1] });
+      }
+    );
+  });
+})
+
+
+//Get All Ojournals for one particular publisher
 app.get("/ojournals/:id", async (req, res) => {
   const { id } = req.params;
   pool.getConnection(function (err, connection) {
@@ -176,6 +298,8 @@ app.get("/ojournals/:id", async (req, res) => {
   });
 });
 
+
+//Get All Ebook Publishers
 app.get("/publishers",async (req,res)=>{
   pool.getConnection(function (err, connection) {
     connection.query(
@@ -191,6 +315,7 @@ app.get("/publishers",async (req,res)=>{
   });
 })
 
+//New Ebook Post Request
 app.post("/new-ebook",async(req,res)=>{
   console.log(req.body);
   const {title,link,publisher,author}=req.body;
@@ -217,6 +342,8 @@ app.post("/new-ebook",async(req,res)=>{
   })
 })
 
+
+//Excel Upload for New Ebook Post Request
 app.post("/multiple-new-ebook",async(req,res)=>{
   console.log(req.body);
   const {ebooks,publishers}=req.body;
