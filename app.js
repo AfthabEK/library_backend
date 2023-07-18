@@ -63,7 +63,61 @@ app.get('/ebooks/:id' , async(req,res)=> {
     })
 })
 
-
+//New Publisher
+app.post('/new-publisher',async(req,res)=>{
+  const {name,img,pubType,link,oType}=req.body;
+  if(pubType==="ebooks_publisher"){
+    pool.getConnection(function (err2, connection2) {
+      connection2.query(
+        `INSERT INTO ebooks_publisher(name,img,link) VALUES('${name}','${img}','${link}') `,
+        async (err2, data2) => {
+          connection2.release();
+          if (err2) console.log(err2);
+          else{
+            const responseData = { message: 'The request was successful.',color:'success' };
+          
+          // Send the response data back to the client
+            res.send(responseData);
+          }
+        }
+      );
+    })
+  }
+  else if(pubType==="online_journals_publisher"){
+    pool.getConnection(function (err2, connection2) {
+      connection2.query(
+        `INSERT INTO online_journals_publisher(name,img,link,type) VALUES('${name}','${img}','${link}','${oType}') `,
+        async (err2, data2) => {
+          connection2.release();
+          if (err2) console.log(err2);
+          else{
+            const responseData = { message: 'The request was successful.',color:'success' };
+          
+          // Send the response data back to the client
+            res.send(responseData);
+          }
+        }
+      );
+    })
+  }
+  else{
+    pool.getConnection(function (err2, connection2) {
+      connection2.query(
+        `INSERT INTO ${pubType}(name,img) VALUES('${name}','${img}') `,
+        async (err2, data2) => {
+          connection2.release();
+          if (err2) console.log(err2);
+          else{
+            const responseData = { message: 'The request was successful.',color:'success' };
+          
+          // Send the response data back to the client
+            res.send(responseData);
+          }
+        }
+      );
+    })
+  }
+})
 //Edit Individual Ebook Form Page
 app.get('/ebooks/:publisher_id/:ebook_id',async(req,res)=>{
   const {publisher_id,ebook_id}=req.params;
@@ -104,6 +158,12 @@ app.put('/ebooks/:publisher_id/:ebook_id',async(req,res)=>{
               async (err2, data2) => {
                 connection2.release();
                 if (err2) console.log(err2);
+                else{
+                  const responseData = { message: 'The request was successful.',color:'success' };
+                
+                // Send the response data back to the client
+                  res.send(responseData);
+                }
               }
             );
           })
@@ -210,6 +270,12 @@ app.post("/new-ojournal",async(req,res)=>{
               async (err2, data2) => {
                 connection2.release();
                 if (err2) console.log(err2);
+                else{
+                  const responseData = { message: 'The request was successful.',color:'success' };
+                
+                // Send the response data back to the client
+                  res.send(responseData);
+                }
               }
             );
           })
@@ -302,6 +368,12 @@ app.put('/ojournals/:publisher_id/:journal_id',async(req,res)=>{
               async (err2, data2) => {
                 connection2.release();
                 if (err2) console.log(err2);
+                else{
+                  const responseData = { message: 'The request was successful.',color:'success' };
+                
+                // Send the response data back to the client
+                  res.send(responseData);
+                }
               }
             );
           })
@@ -377,6 +449,12 @@ app.post("/new-ebook",async(req,res)=>{
               async (err2, data2) => {
                 connection2.release();
                 if (err2) console.log(err2);
+                else{
+                  const responseData = { message: 'The request was successful.',color:'success' };
+                
+                // Send the response data back to the client
+                  res.send(responseData);
+                }
               }
             );
           })
