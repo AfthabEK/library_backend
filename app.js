@@ -548,6 +548,41 @@ app.post("/multiple-new-ebook", async (req, res) => {
   }
 });
 
+//Announcements Crud
+app.get('/announcements',async(req,res)=>{
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `SELECT * FROM announcements `,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else {
+          res.json({ data });
+        }
+      }
+    );
+  });
+})
+
+app.post('/announcements', async(req, res) => {
+  const {title,description}=req.body;
+  const convertedDescription = description.replace(/'/g, "''");
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `INSERT INTO announcements (title, description) VALUES ('${title}', '${convertedDescription}');`,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else {
+          res.json({ data });
+        }
+      }
+    );
+  });
+});
+
+
+
 app.listen(7000, () => {
   console.log("LISTENING ON PORT 7000!");
 });
