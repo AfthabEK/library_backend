@@ -219,6 +219,50 @@ app.post("/new-ojournal",async(req,res)=>{
   })
 })
 
+//POST new ojournal excel
+app.post("/new-ojournal/excel",async(req,res)=>{
+  console.log(req.body);
+  const {ebooks,publishers}=req.body;
+  const allPublishersPresent =await ebooks.every(({Publisher}) => publishers.some(({name}) => name === Publisher));
+  if(allPublishersPresent===true){
+    ebooks.forEach((ebook)=>{
+      const {Title,Link,Publisher,Author}=ebook;
+      pool.getConnection(function (err, connection) {
+        connection.query(
+          `SELECT publisher_id FROM online_journals_publisher WHERE online_journals_publisher.name='${Publisher}' `,
+          async (err, data) => {
+            connection.release();
+            if (err) console.log(err);
+            else {
+              console.log(data);
+              pool.getConnection(function (err2, connection2) {
+                connection2.query(
+                  `INSERT INTO online_journals(publisher,title,link,year,publisher_id) VALUES('${Publisher}','${Title}','${Link}','OTHER',${data[0].publisher_id}) `,
+                  async (err2, data2) => {
+                    connection2.release();
+                    if (err2) console.log(err2);
+                  }
+                );
+              })
+            }
+          }
+        );
+      })
+    })
+    const responseData = { message: 'The request was successful.',color:'success' };
+  
+    // Send the response data back to the client
+    res.send(responseData);
+  }
+  else{
+    const responseData = { message: 'Some of the publishers where not present in the database',color:'danger' };
+  
+  // Send the response data back to the client
+    res.send(responseData);
+  }
+
+})
+
 //Edit Individual Ojournal Form Page
 app.get('/ojournals/:publisher_id/:ebook_id', async(req,res)=>{
   const {publisher_id,ebook_id}=req.params;
