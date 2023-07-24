@@ -13,7 +13,8 @@ var pool = mysql.createPool({
   host: "localhost",
   user: "root",
   password: "",
-  database: "library",
+  database: "library2",
+  port:8111,
   multipleStatements: "true", //this is required for querying multiple statements in mysql
 });
 
@@ -549,6 +550,7 @@ app.post("/multiple-new-ebook", async (req, res) => {
 });
 
 //Announcements Crud
+//Get All Announcements
 app.get('/announcements',async(req,res)=>{
   pool.getConnection(function (err, connection) {
     connection.query(
@@ -564,6 +566,8 @@ app.get('/announcements',async(req,res)=>{
   });
 })
 
+
+//Create New Announcement
 app.post('/announcements', async(req, res) => {
   const {title,description}=req.body;
   const convertedDescription = description.replace(/'/g, "''");
@@ -574,12 +578,83 @@ app.post('/announcements', async(req, res) => {
         connection.release();
         if (err) console.log(err);
         else {
-          res.json({ data });
+          const responseData = {
+            message: "The request was successful.",
+            color: "success",
+          };
+
+          // Send the response data back to the client
+          res.send(responseData);
         }
       }
     );
   });
 });
+
+//Get Individual Announcements
+app.get('/announcements/:id',async(req,res)=>{
+  const {id}=req.params;
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `SELECT * FROM announcements WHERE id=${id} `,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else {
+          res.json({ data });
+        }
+      }
+    );
+  });
+})
+
+//Update Announcement
+app.put('/announcements/:id',async(req,res)=>{
+  const {title,description}=req.body;
+  const {id}=req.params;
+  const convertedDescription = description.replace(/'/g, "''");
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `UPDATE announcements SET title='${title}', description='${convertedDescription}' WHERE id=${id};`,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else {
+          const responseData = {
+            message: "The request was successful.",
+            color: "success",
+          };
+
+          // Send the response data back to the client
+          res.send(responseData);
+        }
+      }
+    );
+  });
+})
+
+//Delete Announcment
+app.delete('/announcements/:id',async(req,res)=>{
+  const {id}=req.params;
+  pool.getConnection(function (err, connection) {
+    connection.query(
+      `DELETE FROM announcements  WHERE id=${id};`,
+      async (err, data) => {
+        connection.release();
+        if (err) console.log(err);
+        else {
+          const responseData = {
+            message: "The request was successful.",
+            color: "success",
+          };
+
+          // Send the response data back to the client
+          res.send(responseData);
+        }
+      }
+    );
+  });
+})
 
 
 
